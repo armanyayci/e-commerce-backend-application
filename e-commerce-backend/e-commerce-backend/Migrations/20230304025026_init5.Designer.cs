@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using e_commerce_backend.Models.EntityFramework;
 
@@ -10,9 +11,11 @@ using e_commerce_backend.Models.EntityFramework;
 namespace e_commerce_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230304025026_init5")]
+    partial class init5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,7 +53,7 @@ namespace e_commerce_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Category_Id")
+                    b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("description")
@@ -72,7 +75,7 @@ namespace e_commerce_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Category_Id");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Products");
                 });
@@ -81,7 +84,7 @@ namespace e_commerce_backend.Migrations
                 {
                     b.HasOne("e_commerce_backend.Models.Entity.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("Category_Id")
+                        .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

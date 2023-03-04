@@ -8,7 +8,7 @@ namespace e_commerce_backend.Models.EntityFramework.Abstract
 
         void AddProduct(Product product);
 
-        IQueryable<Product> getProductsById(int product_id);
+        IQueryable<Product> getProductById(int product_id);
 
         IQueryable<Product> getProductsByCategory(int category_id);
 

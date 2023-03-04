@@ -11,8 +11,8 @@ using e_commerce_backend.Models.EntityFramework;
 namespace e_commerce_backend.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230303022202_init")]
-    partial class init
+    [Migration("20230304032033_init1")]
+    partial class init1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,7 +53,7 @@ namespace e_commerce_backend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CustomerId")
+                    b.Property<int>("Category_Id")
                         .HasColumnType("int");
 
                     b.Property<string>("description")
@@ -75,7 +75,7 @@ namespace e_commerce_backend.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("Category_Id");
 
                     b.ToTable("Products");
                 });
@@ -84,7 +84,7 @@ namespace e_commerce_backend.Migrations
                 {
                     b.HasOne("e_commerce_backend.Models.Entity.Category", "Category")
                         .WithMany("Products")
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("Category_Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

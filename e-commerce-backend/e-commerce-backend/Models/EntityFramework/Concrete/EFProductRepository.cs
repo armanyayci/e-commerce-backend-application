@@ -10,19 +10,28 @@ namespace e_commerce_backend.Models.EntityFramework.Concrete
 
         private readonly ApplicationDbContext _context;
 
-        public EFProductRepository(ApplicationDbContext context, ILogger<EFProductRepository> logger)
+        private readonly ICategoryRepository _categoryRepository;
+
+        public EFProductRepository(
+            ApplicationDbContext context,
+            ICategoryRepository categoryRepository,
+            ILogger<EFProductRepository> logger)
         {
             _context = context;
             this.logger = logger;
+            _categoryRepository = categoryRepository;
         }
 
         public IQueryable<Product> getProducts => _context.Products.Where(i=>i.isActive == true) ;
 
-        public void AddProduct(Product product)
+        public async void AddProduct(Product product)
         {
             try
             {
-                _context.Add(product);
+
+                var x = await _context.Categories.FindAsync(product.Category_Id);
+                x.Products.Add(product);
+                _context.Products.Add(product);
                 _context.SaveChanges();
             }
             catch (Exception)
@@ -45,7 +54,7 @@ namespace e_commerce_backend.Models.EntityFramework.Concrete
             }
         }
 
-        public IQueryable<Product> getProductsById(int product_id)
+        public IQueryable<Product> getProductById(int product_id)
         {
             try
             {

@@ -2,18 +2,34 @@ using e_commerce_backend.Models.EntityFramework;
 using e_commerce_backend.Models.EntityFramework.Abstract;
 using e_commerce_backend.Models.EntityFramework.Concrete;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddSingleton<JsonSerializerOptions>(new JsonSerializerOptions() { });
+
+builder.Services.AddControllers().AddJsonOptions(opt => opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+builder.Services.AddRazorPages();
+builder.Services.AddMvc();
+
+builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
+
 
 
 builder.Services.AddScoped<IProductRepository, EFProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
+
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
        options.UseSqlServer(builder.Configuration.GetSection(key: "ConnectionStrings:DefaultConnection").Value));
+
+
 
 
 var app = builder.Build();

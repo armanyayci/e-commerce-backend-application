@@ -20,7 +20,9 @@ namespace e_commerce_backend.Models.Entity
         [Required]
         public Boolean isActive { get; set; }
 
-        [ForeignKey("CustomerId")]
+        //[ForeignKey("CategoryId")]
+
+        public int Category_Id;
         public virtual Category Category { get; set; }
 
 
