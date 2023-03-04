@@ -8,12 +8,11 @@ namespace e_commerce_backend.Models.EntityFramework.Abstract
 
         void AddProduct(Product product);
 
-        IQueryable<Product> getProductById(int product_id);
+        Product getProductById(int product_id);
 
         IQueryable<Product> getProductsByCategory(int category_id);
+        void softdelete(Product deleted_product);
 
-
-
-
+        void activeproduct(int id);
     }
 }

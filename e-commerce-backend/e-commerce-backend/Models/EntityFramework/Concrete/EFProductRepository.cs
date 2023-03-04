@@ -24,13 +24,10 @@ namespace e_commerce_backend.Models.EntityFramework.Concrete
 
         public IQueryable<Product> getProducts => _context.Products.Where(i=>i.isActive == true) ;
 
-        public async void AddProduct(Product product)
+        public void AddProduct(Product product)
         {
             try
             {
-
-                var x = await _context.Categories.FindAsync(product.Category_Id);
-                x.Products.Add(product);
                 _context.Products.Add(product);
                 _context.SaveChanges();
             }
@@ -45,7 +42,7 @@ namespace e_commerce_backend.Models.EntityFramework.Concrete
         {
             try
             {
-                return _context.Products.Where(i => i.Category.Id == category_id && i.isActive == true);
+                return _context.Products.Where(i => i.Category_Id == category_id && i.isActive == true);
             }
             catch (Exception)
             {
@@ -54,11 +51,12 @@ namespace e_commerce_backend.Models.EntityFramework.Concrete
             }
         }
 
-        public IQueryable<Product> getProductById(int product_id)
+        public Product getProductById(int product_id)
         {
             try
             {
-                return _context.Products.Where(i => i.Id == product_id && i.isActive == true);
+                var product = _context.Products.Where(i => i.Id == product_id && i.isActive == true).FirstOrDefault();
+                return product;
             }
             catch (Exception)
             {
@@ -66,6 +64,35 @@ namespace e_commerce_backend.Models.EntityFramework.Concrete
                 throw;
             }
             
+        }
+
+        public void softdelete(Product deleted_product)
+        {
+            try
+            {
+                var product = _context.Products.Where(i => i.Id == deleted_product.Id).FirstOrDefault();
+                product.isActive = false;
+                _context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                logger.LogWarning($"product with id -> {deleted_product.Id} couldnt deactive in database");
+                throw;
+            }
+        }
+        public void activeproduct(int id)
+        {
+            try
+            {
+                var product = _context.Products.Where(i => i.Id  == id).FirstOrDefault();
+                product.isActive = true;
+                _context.SaveChanges();
+            }
+            catch (Exception)
+            {
+                logger.LogWarning($"product with id -> {id} couldnt active in database");
+                throw;
+            }
         }
     }
 }

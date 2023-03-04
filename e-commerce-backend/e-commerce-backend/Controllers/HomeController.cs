@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace e_commerce_backend.Controllers
 {
@@ -22,7 +23,6 @@ namespace e_commerce_backend.Controllers
             this.logger = logger;
         }
 
-
         public IActionResult Index()
         {
             logger.LogInformation("Index page has shown");
@@ -33,8 +33,19 @@ namespace e_commerce_backend.Controllers
         {
             try
             {
-                var x = _productRepository.getProducts.ToList();
-                return Ok(x);
+                var products = _productRepository.getProducts.ToList();
+
+                List<ViewProductDTO> productsDTO = new List<ViewProductDTO>();
+
+                foreach (var item in products)
+                {
+                    var dto = ViewProductDTO.Convert(item);
+                    var category = _categoryRepository.findById(item.Category_Id);
+                    dto.category = category.Name;
+                    productsDTO.Add(dto);
+                }
+
+                return Ok(productsDTO);
             }
             catch (Exception)
             {
@@ -43,12 +54,15 @@ namespace e_commerce_backend.Controllers
             }
         }
 
-        public IActionResult productDetail(int id) 
+        public IActionResult productDetail(int id)
         {
             try
             {
-                var x = _productRepository.getProductById(id);
-                return Ok(x);
+                var product = _productRepository.getProductById(id);
+                var dto = ViewProductDTO.Convert(product);
+                var category = _categoryRepository.findById(product.Category_Id);
+                dto.category = category.Name;
+                return Ok(dto);
             }
             catch (Exception)
             {
@@ -56,64 +70,28 @@ namespace e_commerce_backend.Controllers
                 throw;
             }
         }
-
-        public IActionResult productsByCategory(int category_id) 
-        
+            public IActionResult productsByCategory(int id) 
         {
             try
             {
-                logger.LogWarning($"Products by category id -> {category_id} couldnt list in api");
-                var x = _productRepository.getProductsByCategory(category_id).ToList();
-                return Ok(x);
-            }
-            catch (Exception)
-            {
-                logger.LogWarning($"Products by category {category_id} couldnt get in api");
-                throw;
-            }
-        }
+                var products = _productRepository.getProductsByCategory(id).ToList();
+                List<ViewProductDTO> productsDTO = new List<ViewProductDTO>();
 
-        [HttpPost]
-        public IActionResult AddCategory([FromBody] Category category)
-        {
-            try
-            {
-                _categoryRepository.createCategory(category);
-                return Ok(category);
-            }
-            catch (Exception)
-            {
-                logger.LogWarning("category couldnt post in api.");
-                throw;
-            }
-
-        }
-
-
-        [HttpPost]
-        public IActionResult postProducts( [FromBody] AddProductDTO dTO)
-        {
-            try
-            {
-                Product product = new Product
+                foreach (var item in products)
                 {
-                    name = dTO.name,
-                    price = dTO.price,
-                    description = dTO.description,
-                    quantity = dTO.quantity,
-                    Category = _categoryRepository.findById(dTO.category_id),
-                    isActive = true
-                };
+                    var dto = ViewProductDTO.Convert(item);
+                    var category = _categoryRepository.findById(item.Category_Id);
+                    dto.category = category.Name;
+                    productsDTO.Add(dto);
+                }
 
-                _productRepository.AddProduct(product);
-                return Ok(product);
+                return Ok(productsDTO);
             }
-            catch (Exception )
+            catch (Exception)
             {
-                logger.LogWarning("product couldnt post in api with dto");
+                logger.LogWarning($"Products by category {id} couldnt get in api");
                 throw;
-            }      
+            }
         }
-
     }
 }
