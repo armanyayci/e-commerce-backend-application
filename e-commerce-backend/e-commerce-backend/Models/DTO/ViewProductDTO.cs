@@ -1,5 +1,6 @@
 ﻿using e_commerce_backend.Models.Entity;
 using Microsoft.Identity.Client;
+using System.ComponentModel.DataAnnotations;
 
 namespace e_commerce_backend.Models.DTO
 {
