@@ -10,13 +10,13 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
 namespace e_commerce_backend.Controllers
 {
-    public class HomeController : Controller
+    public class ProductController : Controller
     {
-        private readonly ILogger<HomeController> logger;
+        private readonly ILogger<ProductController> logger;
         private readonly IProductRepository _productRepository;
         private readonly ICategoryRepository _categoryRepository;
 
-        public HomeController(IProductRepository productRepository,ICategoryRepository categoryRepository ,ILogger<HomeController> logger)
+        public ProductController(IProductRepository productRepository,ICategoryRepository categoryRepository ,ILogger<ProductController> logger)
         {
             _categoryRepository = categoryRepository;
             _productRepository = productRepository;

@@ -41,6 +41,10 @@ namespace e_commerce_backend.Controllers
         {
             return Ok();
         }
+
+
+
+
         [HttpPost]
         public async Task <IActionResult>Register([FromBody] RegisterDTO dTO)
         {
@@ -58,6 +62,17 @@ namespace e_commerce_backend.Controllers
                     };
                     var result = await _userManager.CreateAsync(user,dTO.password);
 
+
+                    if ( await _roleManager.RoleExistsAsync("User")) 
+                    {
+                        await _userManager.AddToRoleAsync(user, "User");
+                    }
+                    else
+                    {
+                        logger.LogWarning("role is not exist");
+                    }
+                    
+
                     if (result.Succeeded)
                     {
                         return Ok(dTO);
@@ -71,7 +86,7 @@ namespace e_commerce_backend.Controllers
             }
             catch (Exception)
             {
-                logger.LogWarning("register has crushed.");
+                logger.LogWarning("register operation has crushed.");
                 throw;
             }
         }
@@ -89,15 +104,12 @@ namespace e_commerce_backend.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    //var user = _userManager.Find(dTO.email, dTO.password);
-
                     var result = await _signInManager.PasswordSignInAsync(dTO.username,dTO.password,false,true);
 
                     if (result.Succeeded)
                     {
                         return Ok(dTO);
                     }
-                    logger.LogWarning("hata burda");
                     return BadRequest("Invalid user information");
 
                 }
@@ -114,22 +126,18 @@ namespace e_commerce_backend.Controllers
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        public async Task<IActionResult> LogOut()
+        {
+            try
+            {
+                await _signInManager.SignOutAsync();
+                return Ok();
+            }
+            catch (Exception)
+            {
+                logger.LogWarning("logout operation has crushed in api");
+                throw;
+            }
+        }
     }
 }

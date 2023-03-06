@@ -2,12 +2,15 @@
 
 namespace e_commerce_backend.Models.DTO
 {
-    public class LoginDto
+    public class assignUserDto
     {
         [Required]
-        public string username { get; set; }
+        public string userName { get; set; }
         [Required]
-        public string password { get; set; }
+        public string newRole { get; set; }
+
+
+
 
     }
 }

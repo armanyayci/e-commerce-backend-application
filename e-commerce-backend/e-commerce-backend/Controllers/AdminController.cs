@@ -1,107 +1,120 @@
-﻿using e_commerce_backend.Models.DTO;
+﻿using e_commerce_backend.Identity;
+using e_commerce_backend.Models.DTO;
 using e_commerce_backend.Models.Entity;
 using e_commerce_backend.Models.EntityFramework.Abstract;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace e_commerce_backend.Controllers
 {
+
+    [Authorize(Roles ="Admin")]
     public class AdminController : Controller
     {
         private readonly ILogger<AdminController> logger;
-        private readonly IProductRepository _productRepository;
-        private readonly ICategoryRepository _categoryRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public AdminController(IProductRepository productRepository, ICategoryRepository categoryRepository, ILogger<AdminController> logger)
+        public AdminController(ILogger<AdminController> logger
+            ,UserManager<ApplicationUser> userManager
+            ,RoleManager<ApplicationRole> roleManager)
         {
-            _categoryRepository = categoryRepository;
-            _productRepository = productRepository;
+            _userManager = userManager;
+            _roleManager = roleManager;
             this.logger = logger;
-        }
+        }   
 
-        [HttpPost]
-        public IActionResult AddCategory([FromBody] Category category)
+        public  IActionResult getUsers()
         {
             try
             {
-                _categoryRepository.createCategory(category);
-                return Ok(category);
+                List<ApplicationUser> users = new List<ApplicationUser>();
+
+                users = _userManager.Users.ToList();
+                return Ok(users);
             }
             catch (Exception)
             {
-                logger.LogWarning("category couldnt post in api.");
+                logger.LogWarning("users couldnt get from db in api");
                 throw;
-            }
+            }  
         }
 
-        [HttpPost]
-        public IActionResult postProduct([FromBody] AddProductDTO dTO)
+        public async Task <IActionResult> deleteUser([FromBody] deleteUserDTO dTO)
         {
             try
             {
-                Product product = new Product
+                if (ModelState.IsValid)
                 {
-                    name = dTO.name,
-                    price = dTO.price,
-                    description = dTO.description,
-                    quantity = dTO.quantity,
-                    Category = _categoryRepository.findById(dTO.category_id),
-                    isActive = true
-                };
-                _productRepository.AddProduct(product);
-                return Ok(product);
+                    if (dTO.agreed)
+                    {
+                        ApplicationUser user = await _userManager.FindByNameAsync(dTO.userName);
+                        await _userManager.DeleteAsync(user);
+                        return Ok(user);
+                    }
+                    return BadRequest("Agree must be true.");
+                   
+                }
+
+                return Ok("ModelStateIsNotValid");
             }
             catch (Exception)
             {
-                logger.LogWarning("product couldnt post in api with dto");
+                logger.LogWarning("delete user has crushed.");
                 throw;
             }
         }
-
-        public IActionResult deleteProduct(int id)
-        {
-
-            try
-            {
-                var deleted_product = _productRepository.getProductById(id);
-                _productRepository.softdelete(deleted_product);
-                return Ok(deleted_product);
-            }
-            catch (Exception)
-            {
-                logger.LogWarning($"product couldnt deactive by id -> {id} in api");
-                throw;
-            }
-        }
-
-        public IActionResult activeProduct(int id)
+        
+        public async Task<IActionResult>getUser(int id)
         {
             try
             {
-                //var active_product = _productRepository.getProductById(id);
-                _productRepository.activeproduct(id);
-                return Ok(_productRepository.getProductById(id));
+                ApplicationUser user = await _userManager.FindByIdAsync(id.ToString());
+               
+                return Ok(user);
             }
             catch (Exception)
             {
-                logger.LogWarning($"product with id -> {id} couldnt active in api");
+                logger.LogWarning("getuser has crushed");
                 throw;
             }
         }
 
 
+        [HttpPost]
+        public async Task<IActionResult> assignRole([FromBody] assignUserDto dTO)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    var user = await _userManager.FindByNameAsync(dTO.userName);
+                    var userroles = await _userManager.GetRolesAsync(user);
 
+                    if (await _roleManager.RoleExistsAsync(dTO.newRole))
+                    {
+                        if (!await _userManager.IsInRoleAsync(user, dTO.newRole))
+                        {
+                            await _userManager.RemoveFromRolesAsync(user, userroles);
 
+                            await _userManager.AddToRoleAsync(user, dTO.newRole);
+                            return Ok(dTO);
+                        }
 
+                        return BadRequest("User already has this role");
+                    }
 
+                    return BadRequest($"There is no role with this name {dTO.newRole}");
+                }
 
-
-
-
-
-
-
-
-
-
+                return BadRequest("ModelStateIsNotValid");
+            }
+            catch (Exception)
+            {
+                logger.LogWarning("assing role has crushed.");
+                throw;
+            }          
+        }
     }
 }
